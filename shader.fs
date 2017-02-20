@@ -22,6 +22,8 @@ uniform float sphereN;
 
 
 //#### RAYON ####
+// Ori : origine (vecteur 3D)
+// v : direction du vecteur)
 struct Ray{
 	vec3 ori;
 	float t;
@@ -29,12 +31,18 @@ struct Ray{
 };
 	
 //#### LIGHT ####	
+// c : point d'origine de la lumière
+// p : puissance de la lumière
 struct Light{
 		vec3 c;	//Center of the light
 		float p;	//Power of the light (spectrum)
 	};
 
 //#### 	MATERIAU ####
+// Kd : couleur du matériau
+// Ks : valeur de la composante de specularité
+// ni : indice de refractance du matériau (0 et 3.0)
+// m : indice de rugosité du matériau (0 et 1.5)
 struct Materiau {
 	vec3 Kd;
 	
@@ -54,7 +62,7 @@ struct Sphere{
 	
 
 
-float getTMin(float a, float b, float c){
+float intersectSphere(float a, float b, float c){
 	float delta = b*b-(4.0*a*c);	
 	if(delta < 0.0){
 		return -1.0;
@@ -160,7 +168,7 @@ void main(void){
 	sphere.mat.Kd = sphereColor;
 	sphere.mat.Ks = sphereKs;
 	sphere.mat.m = sphereN;
-	sphere.mat.ni = 0.5;
+	sphere.mat.ni = 1.5;
 	
 
 	Ray ray;
@@ -186,7 +194,7 @@ void main(void){
 	if(delta < 0.0){
 		gl_FragColor = vec4(backgroundColor,1.0);
 	}else{
-		ray.t = getTMin(a,b,c);
+		ray.t = intersectSphere(a,b,c);
 		vec3 i = (ray.v*ray.t)+ray.ori;
 		vec3 vi = normalize(light.c-i); //VECTEUR VERS LA LUMIERE
 		vec3 n = normalize(i-sphere.c); //VECTEUR NORMAL A LA SPHERE
