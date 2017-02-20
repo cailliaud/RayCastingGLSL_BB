@@ -36,10 +36,10 @@ function showInfoSphere(){
 // =====================================================
 function webGLStart() {
 	//Instanciation d'un objet sphere
-	sphere = new Sphere(0.0,0.0,3.0,0.3,0.0,0.0,1.0, 0.1,50);
+	sphere = new Sphere(0.0,0.0,150.0,15.0,1.0,1.0,1.0, 0.1,0.3);
 	
 	// Instanciation d'un objet lumière
-	light = new Light (0,0,0,3.0);
+	light = new Light (120.0,120.0,0.0,3.0);
 	
 	var canvas = document.getElementById("WebGL-test");
 	initGL(canvas);
@@ -209,17 +209,6 @@ function initShaders(vShaderTxt,fShaderTxt) {
 	drawScene();
 }
 
-function moveSphere(x,y,z){
-	sphere.x +=x;
-	sphere.y +=y;
-	sphere.z +=z;
-	refreshInfo();
-	setUniform();
-	drawScene();
-}
-
-
-
 
 function setUniform(){
 	gl.uniform3f(shaderProgram.sphereCenter, sphere.x, sphere.y, sphere.z);
@@ -275,34 +264,6 @@ function redraw() {
 
 
 }
-
-function reset(){
-	sphere.x= 0; 
-	sphere.y= 0; 
-	sphere.z= 3;
-	sphere.rad = 0.3;
-	sphere.r= 0.0; 
-	sphere.g = 0.0; 
-	sphere.b = 1.0; 
-	sphere.n= 50;
-	sphere.Ks = 0.1;
-	
-	light.x= 0.0; 
-	light.y= 0.0; 
-	light.z= 0.0;
-	light.p= 1.0;
-
-
-	
-	setUniform();
-	drawScene();
-	
-	refreshInfo();
-}
-
-
-
-
 
 
 

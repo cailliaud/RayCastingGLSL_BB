@@ -19,84 +19,16 @@
 
 <table >
 	<tr>
-		<td colspan="2" >
+		<td  >
 			<canvas id="WebGL-test" style="border: 1px solid black;" width="720" height="480"></canvas>
 		</td>
-		<td>
-			<table>
-				<tr>
-					<td colspan ="2"> <button style="width:100%" type="button" onclick="reset();">Reset</button></td>
-				</tr>
-				<tr>
-					<td>
-						<button style="width:100%" type="button" onclick="moveSphere(-0.1,0,0);">Move left</button>
-					</td>
-					<td>
-						<button style="width:100%" type="button" onclick="moveSphere(0.1,0,0);">Move right</button>
-					</td>
-
-				</tr>
-				<tr>
-					<td>
-						<button style="width:100%" type="button" onclick="moveSphere(0,0.1,0);">Move up</button>
-					</td>
-					<td>
-						<button style="width:100%" type="button" onclick="moveSphere(0,-0.1,0);">Move down</button>
-					</td>
-
-				</tr>
-				<tr>
-					<td>
-						<button style="width:100%" type="button" onclick="moveSphere(0,0,0.1);">Move forward</button>
-					</td>
-					<td>
-						<button style="width:100%" type="button" onclick="moveSphere(0,0,-0.1);">Move backward</button>
-					</td>
-
-				</tr>
-
-			</table>
-			</td>
+		
 	</tr>
 	
 	
 	
 </table>
 <table>
-
-				<th colspan="2">
-					Informations sur la lumière
-				</th>
-				<th colspan="2">
-					Informations sur la sphère
-				</th>
-				
-				<tr>
-					<td>Position x (<output id="outputXLight"></output>) :</td>
-					<td>-5<input type=range min="-5" max="5" step="0.1"  id="posXLight" onchange="redraw();" />5</td>
-				
-					<td>Position x (<output id="outputXSphere"></output>):</td>
-					<td>-5<input type=range min="-5" max="5" step="0.1"  id="posX"  onchange="redraw();" />5</td>
-				</tr>
-				<tr>
-					<td>Position y (<output id="outputYLight"></output>) :</td>
-					<td>-5<input type=range min="-5" max="5" step="0.1"  id="posYLight"  onchange="redraw();" />5</td>
-					<td>Position y (<output id="outputYSphere"></output>):</td>
-					<td>-5<input type=range min="-5" max="5" step="0.1"  id="posY"  onchange="redraw();" />5</td>
-				</tr>
-				<tr>
-					<td>Position z (<output id="outputZLight"></output>):</td>
-					<td>-5<input type=range min="-5" max="5" step="0.1" id="posZLight"  onchange="redraw();" />5</td>
-					
-					<td>Position z (<output id="outputZSphere"></output>):</td>
-					<td>0<input type=range min="0" max="5" step="0.1"  id="posZ"  onchange="redraw();" />5</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td></td>
-					<td>Radius (<output id="outputradius"></output>):</td>
-					<td>0<input type=range min="0" max="1" step="0.1"  id="radius"  onchange="redraw();" />1<td>
-				</tr>
 				<th colspan="2">
 					Informations sur la Couleur de la lumière
 				</th>
@@ -104,8 +36,8 @@
 					Informations sur la Couleur de la sphère
 				</th>
 				<tr>
-					<td rowspan="6" >Puissance de la lumiere KD(<output id="outputPuissanceLight"></output>):</td>
-					<td rowspan="6" >0<input type=range min="0" max="5" step="0.05"  id="PuissanceLight"  onchange="redraw();" />5</td>
+					<td rowspan="6" >Valeur KD(<output id="outputPuissanceLight"></output>):</td>
+					<td rowspan="6" >0<input type=range min="0" max="10" step="0.1"  id="PuissanceLight"  onchange="redraw();" />10</td>
 					
 					<td>Valeur de rouge (<output id="outputRedSphere"></output>):</td>
 					<td>0<input type=range min="0" max="1" step="0.05"  id="red"  onchange="redraw();" />1</td>
@@ -126,14 +58,49 @@
 					<td>0<input type=range min="0" max="1" step="0.05"  id="blue"  onchange="redraw();" />1</td>
 				</tr>
 					<td >KS (<output id="outputKs"></output>):</td>
-					<td >0<input type=range min="0" max="1" step="0.05"  id="Ks"  onchange="redraw();" />1</td>
+					<td >0<input type=range min="0" max="3" step="0.1"  id="Ks"  onchange="redraw();" />3</td>
 				<tr>
 				</tr>
 				<tr>
 				
-					<td >Valeur de N(<output id="outputN"></output>):</td>
-					<td >0<input type=range min="0" max="200" step="1"  id="N"  onchange="redraw();" />200</td>
+					<td >Valeur de M(<output id="outputN"></output>):</td>
+					<td >0<input type=range min="0" max="1.5" step="0.1"  id="N"  onchange="redraw();" />1.5</td>
 				</tr>
+
+				<th colspan="2">
+					Informations sur la lumière
+				</th>
+				<th colspan="2">
+					Informations sur la sphère
+				</th>
+				
+				<tr>
+					<td>Position x (<output id="outputXLight"></output>) :</td>
+					<td>-200<input type=range min="-200" max="200" step="5"  id="posXLight" onchange="redraw();" />200</td>
+				
+					<td>Position x (<output id="outputXSphere"></output>):</td>
+					<td>-200<input type=range min="-200" max="200" step="5"  id="posX"  onchange="redraw();" />200</td>
+				</tr>
+				<tr>
+					<td>Position y (<output id="outputYLight"></output>) :</td>
+					<td>-200<input type=range min="-200" max="200" step="5"  id="posYLight"  onchange="redraw();" />200</td>
+					<td>Position y (<output id="outputYSphere"></output>):</td>
+					<td>-200<input type=range min="-200" max="200" step="5"  id="posY"  onchange="redraw();" />200</td>
+				</tr>
+				<tr>
+					<td>Position z (<output id="outputZLight"></output>):</td>
+					<td>-200<input type=range min="-200" max="200" step="5" id="posZLight"  onchange="redraw();" />200</td>
+					
+					<td>Position z (<output id="outputZSphere"></output>):</td>
+					<td>0<input type=range min="0" max="200" step="5"  id="posZ"  onchange="redraw();" />200</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td>Radius (<output id="outputradius"></output>):</td>
+					<td>0<input type=range min="0" max="50" step="1"  id="radius"  onchange="redraw();" />50<td>
+				</tr>
+				
 
 </table>
 
