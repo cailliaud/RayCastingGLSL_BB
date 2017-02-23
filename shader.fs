@@ -18,7 +18,8 @@ uniform int antialiasing;
 uniform vec3 lumiereCenter;
 uniform float lumierePuissance;
 uniform float sphereKs;
-uniform float sphereN;
+uniform float sphereM;
+uniform float sphereNi;
 
 
 //#### RAYON ####
@@ -167,8 +168,8 @@ void main(void){
 	sphere.r = sphereRadius;
 	sphere.mat.Kd = sphereColor;
 	sphere.mat.Ks = sphereKs;
-	sphere.mat.m = sphereN;
-	sphere.mat.ni = 1.5;
+	sphere.mat.m = sphereM;
+	sphere.mat.ni = sphereNi;
 	
 
 	Ray ray;
