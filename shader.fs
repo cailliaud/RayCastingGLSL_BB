@@ -16,7 +16,7 @@ When used as an index, a constant-index-expression must have integral type.
 //attribut du plan image
 const float screenWidth = 	720.0;
 const float screenHeight = 480.0;
-const float focal = 50.0;
+const float focal = 50.0; //50.0
 
 /**
 * Algorythme Mode:
@@ -97,6 +97,18 @@ struct Sphere{
 		Materiau mat;
 	};
 	
+//#### PLAN ####
+/**
+* Definition d'un plan
+* Ax + By + Cz + D = 0
+* norm : normal du plan
+* h : hauteur
+*/
+struct Plan{
+	vec3 norm;
+	float h;
+
+};
 
 //############### Intersection algorythm ##############
 /**
@@ -135,22 +147,33 @@ float intersectSphere(Sphere s, Ray r){
 /**
 * Permet de lancer le rayon pour chaque sphere @see intersectSphere();
 */
-void intersection(Sphere[nbS] spheres, Ray r, out float tMin, out Sphere s){
+bool intersection(Sphere[nbS] spheres, Ray r, out float tMin, out Sphere s){
 	float tAux;
 	tMin = -1.0;
 	for (int i = 0; i < nbS; i++){
 		tAux = intersectSphere(spheres[i], r);
-		if (tMin == -1.0 && tAux > focal || tAux > focal && tAux < tMin){
+		if (tMin == -1.0 && tAux > 0.0 || tAux > 0.0 && tAux < tMin){
 			tMin = tAux;
 			s = spheres[i];
 		}
 	}
-	if(tMin == -1.0){gl_FragColor = vec4(backgroundColor,1.0);}
+	
+	return tMin>=0.0;
+}
+
+/**
+* Fonction Intersection Plan 
+*/ 
+bool intersectPlan(Plan p , Ray r, out float tMin){
+	 //"RayCasting"
+	 tMin = -(dot(p.norm,r.ori)+p.h)/(dot(p.norm,r.v));
+     return tMin>=0.0;
+
 }
 
 
 //############### ALGORYTHM 1 ##############
-//############# Lambertian Shading  ########
+//############# Lambertian Shading for Sphere  ########
 void lambertianShading(Light light, vec3 n, vec3 vi, Sphere sphereHit){
 	float theta = dot(vi, n);
 	if(theta > 0.0){ 	//Couleur coté ECLAIRE de la sphere
@@ -230,10 +253,20 @@ void microFacette (Light Li, vec3 n, vec3 Vi, vec3 V0, Sphere s){
 	float F =  getFresnel ( n,  Vi,  V0,  s);
 	float G = getG ( n,  Vi,  V0);
 	vec3 RGB = vec3( Li.p * ((s.mat.Kd/M_PI) + s.mat.Ks*(D*F*G / 4.0 * dot(Vi,n)*dot(V0,n)) ) * costeta );
-	gl_FragColor = vec4(RGB,1.0);
+	 gl_FragColor = vec4(RGB,1.0);
 }
 
-
+//############### ALGORYTHM PLan ##############
+//############# Lambertian Shading for Plan  ########
+void lambertianShadingPlan(Light light, vec3 n, vec3 vi, vec3 Kd){
+	float theta = dot(vi, n);
+	if(theta > 0.0){ 	//Couleur coté ECLAIRE de la sphere
+		gl_FragColor = vec4(light.p*Kd/M_PI*theta,1.0);
+	}
+	else{ 				//Couleur coté SOMBRE de la sphere
+		gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+	}
+}
 	
 void main(void){
 
@@ -300,27 +333,62 @@ void main(void){
 			)
 		);
 		
-		
+	//####DEFINTION DU PLAN
+	Plan plan;
+	plan.norm = normalize(vec3(0.0,1.0,0.0));
+	plan.h = 20.0;
+
+	
 		
 	//#### DEBUT DU RAY CASTING ####
 	Sphere sphereHit;
-	intersection(spheres, ray, ray.t, sphereHit);
-	vec3 i = (ray.v * ray.t) + ray.ori;     //Point d'impact avec la sphere
-
-
-		
-	if(i.z > focal){
-		//Calcul des vecteurs à l'impact
+	float tPlan,tSphere;
+	bool bSphere = intersection(spheres, ray, tSphere, sphereHit);
+	bool bPlan= intersectPlan(plan,ray, tPlan);
+	vec3 i = vec3(-1.0);
+	if (bSphere && tSphere<tPlan || bSphere && !bPlan){
+		i = (ray.v * tSphere) + ray.ori; 
+		// Calcul des vecteurs à l'impact
 		vec3 vi = normalize(light.c - i); 		//VECTEUR VERS LA LUMIERE
 		vec3 n = normalize(i - sphereHit.c); 	//VECTEUR NORMAL A LA SPHERE
 		vec3 v0 = normalize(ray.ori-i); // Vecteur vers l'origine
-		
+	
 		if(algorythm==0){gl_FragColor = vec4(sphereHit.mat.Kd,1.0);}
 		if(algorythm==1){lambertianShading(light, n, vi, sphereHit);}
 		if(algorythm==2){phong(light, sphereHit, vi, v0, n);}
 		if(algorythm==3){microFacette (light, n, vi, v0, sphereHit);}
-	}else {
-		gl_FragColor = vec4 (backgroundColor, 1.0);
+	
 	}
+	else if (bPlan)  {
+		i = (ray.v * tPlan) + ray.ori; 
+		vec3 vi = normalize(light.c - i); 		
+		vec3 n = normalize( plan.norm); 	
+		vec3 v0 = normalize(ray.ori-i); 
+		if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
+			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
+			// gl_FragColor = vec4(0.1,0.1,0.3,1.0);
+			}
+		else {
+			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.5));
+			// gl_FragColor = vec4(0.1,0.1,0.5,1.0);
+		}
+	}else {
+		gl_FragColor = vec4(0.7,0.7,0.7,1.0);
+	}
+	
+	
+	vec3 vi = normalize(light.c - i);
+	Ray toLight;
+	toLight.v = vi;
+	toLight.ori = i+vi;
+	bool obstacle = intersection(spheres, toLight , tSphere, sphereHit);
+	if(obstacle){
+		gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+	}
+	
+	
+		
+	
+	
 	
  }

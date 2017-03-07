@@ -7,7 +7,7 @@ var fragShaderTxt;
 var shaderProgram;
 var vertexBuffer;
 var sphere = null;
-var backgroundColor = [0.0,0.0,0.0];
+var backgroundColor = [0.2,0.2,0.2];
 
 function Sphere(x,y,z,rad,mat){
 	this.x = x;
