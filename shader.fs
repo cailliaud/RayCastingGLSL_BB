@@ -252,7 +252,7 @@ void microFacette (Light Li, vec3 n, vec3 Vi, vec3 V0, Sphere s){
 	float D  =  getDistribution ( n,  Vi,  V0,  s);
 	float F =  getFresnel ( n,  Vi,  V0,  s);
 	float G = getG ( n,  Vi,  V0);
-	vec3 RGB = vec3( Li.p * ((s.mat.Kd/M_PI) + s.mat.Ks*(D*F*G / 4.0 * dot(Vi,n)*dot(V0,n)) ) * costeta );
+	vec3 RGB = vec3( Li.p * ((s.mat.Kd/M_PI) + (D*F*G / 4.0 * dot(Vi,n)*dot(V0,n)) ) * costeta );
 	 gl_FragColor = vec4(RGB,1.0);
 }
 
@@ -293,7 +293,7 @@ void main(void){
 	Sphere sphere2;
 	sphere2.c = sphere.c +vec3(-5.0,-5.0,-15.0);
 	sphere2.r = sphere.r;
-	sphere2.mat.Kd = vec3(1.0,0.0,0.0);
+	sphere2.mat.Kd = sphere.mat.Kd * vec3(0.0,0.0,1.0);
 	sphere2.mat.Ks = sphere.mat.Ks;
 	sphere2.mat.ni = sphere.mat.ni;
 	sphere2.mat.m = sphere.mat.m;
@@ -301,7 +301,7 @@ void main(void){
 	Sphere sphere3;
 	sphere3.c = sphere.c + vec3(13.0, 13.0, +25.0);
 	sphere3.r = sphere.r;
-	sphere3.mat.Kd = vec3(0.0,1.0,1.0);
+	sphere3.mat.Kd = sphere.mat.Kd * vec3(0.0,0.5,0.0);
 	sphere3.mat.Ks = sphere.mat.Ks;
 	sphere3.mat.ni = sphere.mat.ni;
 	sphere3.mat.m = sphere.mat.m;
@@ -309,7 +309,7 @@ void main(void){
 	Sphere sphere4;
 	sphere4.c = sphere.c + vec3(-35.0, 5.0, 7.0);
 	sphere4.r = sphere.r;
-	sphere4.mat.Kd = vec3(1.0,0.0,1.0);
+	sphere4.mat.Kd = sphere.mat.Kd * vec3(1.0,1.0,0.0);
 	sphere4.mat.Ks = sphere.mat.Ks;
 	sphere4.mat.ni = sphere.mat.ni;
 	sphere4.mat.m = sphere.mat.m;

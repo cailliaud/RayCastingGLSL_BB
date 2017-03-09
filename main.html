@@ -22,6 +22,9 @@
 		<td  >
 			<canvas id="WebGL-test" style="border: 1px solid black;" width="720" height="480"></canvas>
 		</td>
+		<td  >
+			<input type=button value="Start !" onclick="physics();" />
+		</td>
 		
 		<td>
 			<table>
@@ -49,7 +52,7 @@
 					<td>0<input type=range min="0" max="1" step="0.05"  id="blue"  onchange="redraw();" />1</td>
 				</tr>
 					<td >KS (<output id="outputKs"></output>):</td>
-					<td >0<input type=range min="0" max="3" step="0.1"  id="Ks"  onchange="redraw();" />3</td>
+					<td >0<input type=range min="0" max="1" step="0.1"  id="Ks"  onchange="redraw();" />1</td>
 				<tr>
 				</tr>
 				<tr>
@@ -68,7 +71,7 @@
 				</th>
 				<tr>
 					<td >Puissance Lumière(<output id="outputPuissanceLight"></output>):</td>
-					<td >0<input type=range min="0" max="10" step="0.1"  id="PuissanceLight"  onchange="redraw();" />10</td>
+					<td >0<input type=range min="0" max="100" step="1"  id="PuissanceLight"  onchange="redraw();" />100</td>
 					
 				
 				</tr>

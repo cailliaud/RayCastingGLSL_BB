@@ -41,12 +41,12 @@ function showInfoSphere(){
 // =====================================================
 function webGLStart() {
 	//Instanciation d'un objet sphere
-	mat = new Materiau(1.0,1.0,1.0,3.0,1.3,0.6);
+	mat = new Materiau(0.1,0.1,0.1,0.0,1.3,0.1);
 	
 	sphere = new Sphere(0.0,0.0,150.0,15.0, mat);
 	
 	// Instanciation d'un objet lumière
-	light = new Light (120.0,120.0,0.0,3.0);
+	light = new Light (120.0,120.0,0.0,11.0);
 	
 	var canvas = document.getElementById("WebGL-test");
 	initGL(canvas);
@@ -60,6 +60,8 @@ function webGLStart() {
 	
 	
 	drawScene();
+	
+	
 }
 
 
@@ -277,6 +279,24 @@ function redraw() {
 
 
 }
+
+var sinL = 0;
+var cosL = 0;
+function physics(){
+			
+			// sphere.y= sphere.y-0.1;
+			sinL++;
+			cosL++;
+			light.x= Math.sin(sinL/100)*500;
+			light.z= Math.cos(cosL/100)*500;
+			setUniform();
+			drawScene();
+			
+			refreshInfo();
+			setTimeout(arguments.callee, 200);
+	};
+
+
 
 
 
