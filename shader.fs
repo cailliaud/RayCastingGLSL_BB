@@ -291,7 +291,7 @@ void main(void){
 	sphere.mat.ni = sphereNi;
 	
 	Sphere sphere2;
-	sphere2.c = sphere.c +vec3(-5.0,-5.0,-15.0);
+	sphere2.c = sphere.c +vec3(-5.0,20.0,-15.0);
 	sphere2.r = sphere.r;
 	sphere2.mat.Kd = sphere.mat.Kd * vec3(0.0,0.0,1.0);
 	sphere2.mat.Ks = sphere.mat.Ks;
@@ -365,11 +365,11 @@ void main(void){
 		vec3 n = normalize( plan.norm); 	
 		vec3 v0 = normalize(ray.ori-i); 
 		if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
-			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
+			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
 			// gl_FragColor = vec4(0.1,0.1,0.3,1.0);
 			}
 		else {
-			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.5));
+			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
 			// gl_FragColor = vec4(0.1,0.1,0.5,1.0);
 		}
 	}else {

@@ -8,6 +8,9 @@ var shaderProgram;
 var vertexBuffer;
 var sphere = null;
 var backgroundColor = [0.2,0.2,0.2];
+var timer;
+var sinL = 0;
+var cosL = 0;
 
 function Sphere(x,y,z,rad,mat){
 	this.x = x;
@@ -43,10 +46,10 @@ function webGLStart() {
 	//Instanciation d'un objet sphere
 	mat = new Materiau(0.1,0.1,0.1,0.0,1.3,0.1);
 	
-	sphere = new Sphere(0.0,0.0,150.0,15.0, mat);
+	sphere = new Sphere(0.0,0.0,150.0,9.0, mat);
 	
 	// Instanciation d'un objet lumière
-	light = new Light (120.0,120.0,0.0,11.0);
+	light = new Light (120.0,350.0,0.0,15.0);
 	
 	var canvas = document.getElementById("WebGL-test");
 	initGL(canvas);
@@ -280,24 +283,47 @@ function redraw() {
 
 }
 
-var sinL = 0;
-var cosL = 0;
-function physics(){
+
+function start(){
 			
 			// sphere.y= sphere.y-0.1;
 			sinL++;
 			cosL++;
 			light.x= Math.sin(sinL/100)*500;
 			light.z= Math.cos(cosL/100)*500;
+			gravity();
+			gravityX();
 			setUniform();
 			drawScene();
 			
 			refreshInfo();
-			setTimeout(arguments.callee, 200);
+			timer  = setTimeout(arguments.callee, 16);
+			
 	};
 
 
+function stop() {
+        if (timer) {
+            clearTimeout(timer);
+            timer = 0;
+        }
+}
 
+var speed = 0.01;
+var g = -0.02;
+var speedX = 0.01;
+var gX = -0.01;
+function gravity(){
+	speed += g;
+	sphere.y += speed;
+	if (sphere.y-sphere.rad <= -20.0) {speed = 1;}
+}
+
+function gravityX(){
+	speedX += gX;
+	sphere.x += speedX;
+	if (sphere.x <=-20.0 ) {speedX = 1;}
+}
 
 
 

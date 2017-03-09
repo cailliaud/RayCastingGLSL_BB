@@ -6,8 +6,8 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
 <!------------------------------------------------------------------->
-	<script type="text/javascript" src="glMatrix.js"></script>
-	<script type="text/javascript" src="callbacks.js"></script>
+	<script type="text/javascript" src="glMatrix.js"></script> 
+	 <script type="text/javascript" src="callbacks.js"></script> 
 	<script type="text/javascript" src="glCourseBasis.js"></script>
 <!------------------------------------------------------------------->
 	 <link rel="stylesheet" type="text/css" href="monstyle.css">
@@ -23,7 +23,10 @@
 			<canvas id="WebGL-test" style="border: 1px solid black;" width="720" height="480"></canvas>
 		</td>
 		<td  >
-			<input type=button value="Start !" onclick="physics();" />
+			<input type=button value="Start !" onclick="start();" />
+		</td>
+		<td>
+		<input type=button value="Stop !" onclick="stop();" />
 		</td>
 		
 		<td>
@@ -71,7 +74,7 @@
 				</th>
 				<tr>
 					<td >Puissance Lumière(<output id="outputPuissanceLight"></output>):</td>
-					<td >0<input type=range min="0" max="100" step="1"  id="PuissanceLight"  onchange="redraw();" />100</td>
+					<td >0<input type=range min="0" max="50" step="1"  id="PuissanceLight"  onchange="redraw();" />50</td>
 					
 				
 				</tr>
@@ -100,7 +103,7 @@
 				</tr>
 				<tr>
 					<td>Position y (<output id="outputYLight"></output>) :</td>
-					<td>-200<input type=range min="-200" max="200" step="5"  id="posYLight"  onchange="redraw();" />200</td>
+					<td>0<input type=range min="0" max="500" step="5"  id="posYLight"  onchange="redraw();" />500</td>
 					<td>Position y (<output id="outputYSphere"></output>):</td>
 					<td>-100<input type=range min="-100" max="100" step="5"  id="posY"  onchange="redraw();" />100</td>
 				</tr>
