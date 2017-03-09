@@ -17,6 +17,8 @@ function Sphere(x,y,z,rad,mat){
 	this.y = y;
 	this.z = z;
 	this.rad = rad;
+	this.g = -0.02;
+	this.speed= 0.1;
 
 	this.mat = mat;
 }
@@ -44,9 +46,15 @@ function showInfoSphere(){
 // =====================================================
 function webGLStart() {
 	//Instanciation d'un objet sphere
-	mat = new Materiau(0.1,0.1,0.1,0.0,1.3,0.1);
+	mat1 = new Materiau(0.1,0.1,0.1,0.0,1.3,0.1);
+	mat2 = new Materiau(0.0,0.3,0.1,0.0,0.9,0.1);
+	mat3 = new Materiau(0.2,0.4,0.3,0.0,1.1,0.1);
+	mat4 = new Materiau(0.1,0.0,0.3,0.0,1.7,0.1);
 	
-	sphere = new Sphere(0.0,0.0,150.0,9.0, mat);
+	sphere = new Sphere(0.0,0.0,150.0,9.0, mat1);
+	sphere2 = new Sphere(0.0,25,150.0,7.0, mat2);
+	sphere3 = new Sphere(-50.0,10.0,300.0,13.0, mat3);
+	sphere4 = new Sphere(25,5.0,100.0,9.0, mat4);
 	
 	// Instanciation d'un objet lumière
 	light = new Light (120.0,350.0,0.0,15.0);
@@ -200,12 +208,33 @@ function initShaders(vShaderTxt,fShaderTxt) {
 
 	gl.useProgram(shaderProgram);
 	
-	shaderProgram.sphereCenter = gl.getUniformLocation(shaderProgram, "sphereCenter");
-	shaderProgram.sphereRadius = gl.getUniformLocation(shaderProgram, "sphereRadius");
-	shaderProgram.sphereColor = gl.getUniformLocation(shaderProgram, "sphereColor");
-	shaderProgram.sphereKs = gl.getUniformLocation(shaderProgram, "sphereKs");
-	shaderProgram.sphereM = gl.getUniformLocation(shaderProgram, "sphereM");
-	shaderProgram.sphereNi = gl.getUniformLocation(shaderProgram, "sphereNi");
+	shaderProgram.sphere1_Center = gl.getUniformLocation(shaderProgram, "sphere1_Center");
+	shaderProgram.sphere1_Radius = gl.getUniformLocation(shaderProgram, "sphere1_Radius");
+	shaderProgram.sphere1_Color = gl.getUniformLocation(shaderProgram, "sphere1_Color");
+	shaderProgram.sphere1_Ks = gl.getUniformLocation(shaderProgram, "sphere1_Ks");
+	shaderProgram.sphere1_M = gl.getUniformLocation(shaderProgram, "sphere1_M");
+	shaderProgram.sphere1_Ni = gl.getUniformLocation(shaderProgram, "sphere1_Ni");
+	
+	shaderProgram.sphere2_Center = gl.getUniformLocation(shaderProgram, "sphere2_Center");
+	shaderProgram.sphere2_Radius = gl.getUniformLocation(shaderProgram, "sphere2_Radius");
+	shaderProgram.sphere2_Color = gl.getUniformLocation(shaderProgram, "sphere2_Color");
+	shaderProgram.sphere2_Ks = gl.getUniformLocation(shaderProgram, "sphere2_Ks");
+	shaderProgram.sphere2_M = gl.getUniformLocation(shaderProgram, "sphere2_M");
+	shaderProgram.sphere2_Ni = gl.getUniformLocation(shaderProgram, "sphere2_Ni");
+	
+	shaderProgram.sphere3_Center = gl.getUniformLocation(shaderProgram, "sphere3_Center");
+	shaderProgram.sphere3_Radius = gl.getUniformLocation(shaderProgram, "sphere3_Radius");
+	shaderProgram.sphere3_Color = gl.getUniformLocation(shaderProgram, "sphere3_Color");
+	shaderProgram.sphere3_Ks = gl.getUniformLocation(shaderProgram, "sphere3_Ks");
+	shaderProgram.sphere3_M = gl.getUniformLocation(shaderProgram, "sphere3_M");
+	shaderProgram.sphere3_Ni = gl.getUniformLocation(shaderProgram, "sphere3_Ni");
+	
+	shaderProgram.sphere4_Center = gl.getUniformLocation(shaderProgram, "sphere4_Center");
+	shaderProgram.sphere4_Radius = gl.getUniformLocation(shaderProgram, "sphere4_Radius");
+	shaderProgram.sphere4_Color = gl.getUniformLocation(shaderProgram, "sphere4_Color");
+	shaderProgram.sphere4_Ks = gl.getUniformLocation(shaderProgram, "sphere4_Ks");
+	shaderProgram.sphere4_M = gl.getUniformLocation(shaderProgram, "sphere4_M");
+	shaderProgram.sphere4_Ni = gl.getUniformLocation(shaderProgram, "sphere4_Ni");
 	
 	
 	shaderProgram.backgroundColor = gl.getUniformLocation(shaderProgram, "backgroundColor");
@@ -227,12 +256,33 @@ function initShaders(vShaderTxt,fShaderTxt) {
 
 
 function setUniform(){
-	gl.uniform3f(shaderProgram.sphereCenter, sphere.x, sphere.y, sphere.z);
-	gl.uniform1f(shaderProgram.sphereRadius, sphere.rad);
-	gl.uniform3f(shaderProgram.sphereColor, sphere.mat.r, sphere.mat.g, sphere.mat.b);
-	gl.uniform1f(shaderProgram.sphereKs, sphere.mat.ks);
-	gl.uniform1f(shaderProgram.sphereM, sphere.mat.m);
-	gl.uniform1f(shaderProgram.sphereNi, sphere.mat.ni);
+	gl.uniform3f(shaderProgram.sphere1_Center, sphere.x, sphere.y, sphere.z);
+	gl.uniform1f(shaderProgram.sphere1_Radius, sphere.rad);
+	gl.uniform3f(shaderProgram.sphere1_Color, sphere.mat.r, sphere.mat.g, sphere.mat.b);
+	gl.uniform1f(shaderProgram.sphere1_Ks, sphere.mat.ks);
+	gl.uniform1f(shaderProgram.sphere1_M, sphere.mat.m);
+	gl.uniform1f(shaderProgram.sphere1_Ni, sphere.mat.ni);
+	
+	gl.uniform3f(shaderProgram.sphere2_Center, sphere2.x, sphere2.y, sphere2.z);
+	gl.uniform1f(shaderProgram.sphere2_Radius, sphere2.rad);
+	gl.uniform3f(shaderProgram.sphere2_Color, sphere2.mat.r, sphere2.mat.g, sphere2.mat.b);
+	gl.uniform1f(shaderProgram.sphere2_Ks, sphere2.mat.ks);
+	gl.uniform1f(shaderProgram.sphere2_M, sphere2.mat.m);
+	gl.uniform1f(shaderProgram.sphere2_Ni, sphere2.mat.ni);
+	
+	gl.uniform3f(shaderProgram.sphere3_Center, sphere3.x, sphere3.y, sphere3.z);
+	gl.uniform1f(shaderProgram.sphere3_Radius, sphere3.rad);
+	gl.uniform3f(shaderProgram.sphere3_Color, sphere3.mat.r, sphere3.mat.g, sphere3.mat.b);
+	gl.uniform1f(shaderProgram.sphere3_Ks, sphere3.mat.ks);
+	gl.uniform1f(shaderProgram.sphere3_M, sphere3.mat.m);
+	gl.uniform1f(shaderProgram.sphere3_Ni, sphere3.mat.ni);
+	
+	gl.uniform3f(shaderProgram.sphere4_Center, sphere4.x, sphere4.y, sphere4.z);
+	gl.uniform1f(shaderProgram.sphere4_Radius, sphere4.rad);
+	gl.uniform3f(shaderProgram.sphere4_Color, sphere4.mat.r, sphere4.mat.g, sphere4.mat.b);
+	gl.uniform1f(shaderProgram.sphere4_Ks, sphere4.mat.ks);
+	gl.uniform1f(shaderProgram.sphere4_M, sphere4.mat.m);
+	gl.uniform1f(shaderProgram.sphere4_Ni, sphere4.mat.ni);
 	
 	
 	gl.uniform3f(shaderProgram.lumiereCenter, light.x, light.y, light.z);
@@ -289,13 +339,16 @@ function start(){
 			// sphere.y= sphere.y-0.1;
 			sinL++;
 			cosL++;
-			light.x= Math.sin(sinL/100)*500;
-			light.z= Math.cos(cosL/100)*500;
-			gravity();
-			gravityX();
+			
+			
+			gravity(sphere);
+			gravity(sphere2);
+			gravity(sphere3);
+			gravity(sphere4);
 			setUniform();
 			drawScene();
-			
+			moveSphere_ZXaxis(sphere);
+			moveLight_XZaxis(light);
 			refreshInfo();
 			timer  = setTimeout(arguments.callee, 16);
 			
@@ -309,21 +362,25 @@ function stop() {
         }
 }
 
-var speed = 0.01;
-var g = -0.02;
-var speedX = 0.01;
-var gX = -0.01;
-function gravity(){
-	speed += g;
-	sphere.y += speed;
-	if (sphere.y-sphere.rad <= -20.0) {speed = 1;}
+
+
+function moveSphere_ZXaxis(s){
+	s.x= Math.sin(sinL/20)*15+5;
+	s.z= Math.cos(cosL/20)*15+150;
 }
 
-function gravityX(){
-	speedX += gX;
-	sphere.x += speedX;
-	if (sphere.x <=-20.0 ) {speedX = 1;}
+function moveLight_XZaxis(light){
+	light.x= Math.sin(sinL/100)*400;
+	light.z= Math.cos(cosL/100)*400;
 }
+function gravity(s){
+	s.speed += s.g;
+	s.y += s.speed;
+	if (s.y-s.rad <= -20.0) {s.speed = s.rad/9;}
+}
+
+
+
 
 
 

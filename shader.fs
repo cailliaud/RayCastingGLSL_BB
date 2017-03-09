@@ -29,18 +29,45 @@ int algorythm = 3;
 
 // Information Sphère 
 const int nbS = 4;
-uniform vec3 sphereCenter;
-uniform float sphereRadius;
-uniform vec3 sphereColor;
 uniform vec3 backgroundColor;
 
 
 // Information lumière
 uniform vec3 lumiereCenter;
 uniform float lumierePuissance;
-uniform float sphereKs;
-uniform float sphereM;
-uniform float sphereNi;
+
+// #####Récupération Sphere 1 #####
+uniform vec3 sphere1_Center;
+uniform float sphere1_Radius;
+uniform vec3 sphere1_Color;
+uniform float sphere1_Ks;
+uniform float sphere1_M;
+uniform float sphere1_Ni;
+
+// #####Récupération Sphere 2 #####
+uniform vec3 sphere2_Center;
+uniform float sphere2_Radius;
+uniform vec3 sphere2_Color;
+uniform float sphere2_Ks;
+uniform float sphere2_M;
+uniform float sphere2_Ni;
+
+
+// #####Récupération Sphere 3 #####
+uniform vec3 sphere3_Center;
+uniform float sphere3_Radius;
+uniform vec3 sphere3_Color;
+uniform float sphere3_Ks;
+uniform float sphere3_M;
+uniform float sphere3_Ni;
+
+// #####Récupération Sphere 4 #####
+uniform vec3 sphere4_Center;
+uniform float sphere4_Radius;
+uniform vec3 sphere4_Color;
+uniform float sphere4_Ks;
+uniform float sphere4_M;
+uniform float sphere4_Ni;
 
 
 //#### RAYON ####
@@ -146,10 +173,11 @@ float intersectSphere(Sphere s, Ray r){
 
 /**
 * Permet de lancer le rayon pour chaque sphere @see intersectSphere();
+* return -1.0 si pas d'intersection et out sphere sera null
 */
-bool intersection(Sphere[nbS] spheres, Ray r, out float tMin, out Sphere s){
+float intersectionAllSpheres(Sphere[nbS] spheres, Ray r,  out Sphere s){
 	float tAux;
-	tMin = -1.0;
+	float tMin = -1.0;
 	for (int i = 0; i < nbS; i++){
 		tAux = intersectSphere(spheres[i], r);
 		if (tMin == -1.0 && tAux > 0.0 || tAux > 0.0 && tAux < tMin){
@@ -157,30 +185,35 @@ bool intersection(Sphere[nbS] spheres, Ray r, out float tMin, out Sphere s){
 			s = spheres[i];
 		}
 	}
+	return tMin;
 	
-	return tMin>=0.0;
 }
 
 /**
 * Fonction Intersection Plan 
+* return -1.0 si pas d'intersection
 */ 
-bool intersectPlan(Plan p , Ray r, out float tMin){
+float intersectPlan(Plan p , Ray r){
 	 //"RayCasting"
-	 tMin = -(dot(p.norm,r.ori)+p.h)/(dot(p.norm,r.v));
-     return tMin>=0.0;
+	 float t = -(dot(p.norm,r.ori)+p.h)/(dot(p.norm,r.v));
+	 if (t<0.0) {return -1.0;}
+	 else{
+	 return t;}
+
 
 }
 
+		
 
 //############### ALGORYTHM 1 ##############
 //############# Lambertian Shading for Sphere  ########
-void lambertianShading(Light light, vec3 n, vec3 vi, Sphere sphereHit){
+vec4 lambertianShading(Light light, vec3 n, vec3 vi, Sphere sphereHit){
 	float theta = dot(vi, n);
 	if(theta > 0.0){ 	//Couleur coté ECLAIRE de la sphere
-		gl_FragColor = vec4(light.p*sphereHit.mat.Kd/M_PI*theta,1.0);
+		return vec4(light.p*sphereHit.mat.Kd/M_PI*theta,1.0);
 	}
 	else{ 				//Couleur coté SOMBRE de la sphere
-		gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+		return vec4(0.0,0.0,0.0,1.0);
 	}
 }
 
@@ -247,24 +280,90 @@ float getFresnel (vec3 n, vec3 Vi, vec3 V0, Sphere s){
 /**
 * Main microfacete
 */
-void microFacette (Light Li, vec3 n, vec3 Vi, vec3 V0, Sphere s){
+vec4 microFacette (Light Li, vec3 n, vec3 Vi, vec3 V0, Sphere s){
 	float costeta =  dot(Vi,n);
 	float D  =  getDistribution ( n,  Vi,  V0,  s);
 	float F =  getFresnel ( n,  Vi,  V0,  s);
 	float G = getG ( n,  Vi,  V0);
 	vec3 RGB = vec3( Li.p * ((s.mat.Kd/M_PI) + (D*F*G / 4.0 * dot(Vi,n)*dot(V0,n)) ) * costeta );
-	 gl_FragColor = vec4(RGB,1.0);
+	return vec4(RGB,1.0);
 }
 
 //############### ALGORYTHM PLan ##############
 //############# Lambertian Shading for Plan  ########
-void lambertianShadingPlan(Light light, vec3 n, vec3 vi, vec3 Kd){
+vec4 lambertianShadingPlan(Light light, vec3 n, vec3 vi, vec3 Kd){
 	float theta = dot(vi, n);
 	if(theta > 0.0){ 	//Couleur coté ECLAIRE de la sphere
-		gl_FragColor = vec4(light.p*Kd/M_PI*theta,1.0);
+		return vec4(light.p*Kd/M_PI*theta,1.0);
 	}
 	else{ 				//Couleur coté SOMBRE de la sphere
+		return vec4(0.0,0.0,0.0,1.0);
+	}
+}
+	
+
+
+/**
+* Fonction Intersection Scene
+*/
+float intersectScene (Sphere[nbS] spheres, Plan plan , Ray r ,Light light, out vec4 BRDF ){
+	float tPlan;
+	float tSphere;
+	float  tMin;
+	Sphere sphereHit;
+	vec3 i;
+	vec3 vi;
+	vec3 n;
+	vec3 vO;
+	tSphere = intersectionAllSpheres(spheres, r, sphereHit);
+	tPlan = intersectPlan(plan,r);
+	
+	if ((tSphere>-1.0 && tPlan==-1.0) || (tSphere > -1.0 && tPlan > -1.0 && tSphere<tPlan)  ){
+		i = (r.v * tSphere) + r.ori; 
+		// Calcul des vecteurs à l'impact
+		vi = normalize(light.c - i); 	
+		n = normalize(i - sphereHit.c); 	
+		vO = normalize(r.ori-i); 
+		BRDF= microFacette(light, n, vi, vO, sphereHit);
+		return tSphere;
+	}
+	if ((tSphere > -1.0 && tPlan > -1.0  && tSphere>tPlan) || (tSphere==-1.0 && tPlan>-1.0) ){
+		i = (r.v * tPlan) + r.ori; 
+		 vi = normalize(light.c - i); 		
+		 n = normalize( plan.norm); 	
+		 vO = normalize(r.ori-i); 
+		if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
+			BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
+			
+			}
+		else {
+			BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
+			
+		}
+		return tPlan;
+	}
+	
+	BRDF= vec4(0.7,0.7,0.7,1.0);
+	return -1.0;
+		
+}
+			
+
+void shadow (float t, Ray ray, Sphere[nbS] spheres, Light light ){
+	Ray toLight;
+	vec3 point_i;
+	vec3 vi;
+	float tMin;
+	Sphere sphereHit;
+	
+	point_i = (ray.v * t) + ray.ori; 
+	vi = normalize(light.c - point_i);
+	toLight.v = vi;
+	toLight.ori = point_i+vi; 
+	tMin = intersectionAllSpheres(spheres, toLight , sphereHit);
+	if(tMin>-1.0){
 		gl_FragColor = vec4(0.0,0.0,0.0,1.0);
+		
 	}
 }
 	
@@ -283,36 +382,36 @@ void main(void){
 	
 	//Sphere principale
 	Sphere sphere;
-	sphere.c = sphereCenter;
-	sphere.r = sphereRadius;
-	sphere.mat.Kd = sphereColor;
-	sphere.mat.Ks = sphereKs;
-	sphere.mat.m = sphereM;
-	sphere.mat.ni = sphereNi;
+	sphere.c = sphere1_Center;
+	sphere.r = sphere1_Radius;
+	sphere.mat.Kd = sphere1_Color;
+	sphere.mat.Ks = sphere1_Ks;
+	sphere.mat.m = sphere1_M;
+	sphere.mat.ni = sphere1_Ni;
 	
 	Sphere sphere2;
-	sphere2.c = sphere.c +vec3(-5.0,20.0,-15.0);
-	sphere2.r = sphere.r;
-	sphere2.mat.Kd = sphere.mat.Kd * vec3(0.0,0.0,1.0);
-	sphere2.mat.Ks = sphere.mat.Ks;
-	sphere2.mat.ni = sphere.mat.ni;
-	sphere2.mat.m = sphere.mat.m;
+	sphere2.c = sphere2_Center;
+	sphere2.r = sphere2_Radius;
+	sphere2.mat.Kd = sphere2_Color;
+	sphere2.mat.Ks = sphere2_Ks;
+	sphere2.mat.m = sphere2_M;
+	sphere2.mat.ni = sphere2_Ni;
 
 	Sphere sphere3;
-	sphere3.c = sphere.c + vec3(13.0, 13.0, +25.0);
-	sphere3.r = sphere.r;
-	sphere3.mat.Kd = sphere.mat.Kd * vec3(0.0,0.5,0.0);
-	sphere3.mat.Ks = sphere.mat.Ks;
-	sphere3.mat.ni = sphere.mat.ni;
-	sphere3.mat.m = sphere.mat.m;
+	sphere3.c = sphere3_Center;
+	sphere3.r = sphere3_Radius;
+	sphere3.mat.Kd = sphere3_Color;
+	sphere3.mat.Ks = sphere3_Ks;
+	sphere3.mat.m = sphere3_M;
+	sphere3.mat.ni = sphere3_Ni;
 	
 	Sphere sphere4;
-	sphere4.c = sphere.c + vec3(-35.0, 5.0, 7.0);
-	sphere4.r = sphere.r;
-	sphere4.mat.Kd = sphere.mat.Kd * vec3(1.0,1.0,0.0);
-	sphere4.mat.Ks = sphere.mat.Ks;
-	sphere4.mat.ni = sphere.mat.ni;
-	sphere4.mat.m = sphere.mat.m;
+	sphere4.c = sphere4_Center;
+	sphere4.r = sphere4_Radius;
+	sphere4.mat.Kd = sphere4_Color;
+	sphere4.mat.Ks = sphere4_Ks;
+	sphere4.mat.m = sphere4_M;
+	sphere4.mat.ni = sphere4_Ni;
 	
 	spheres[0] = sphere;	
 	spheres[1] = sphere2;
@@ -341,50 +440,45 @@ void main(void){
 	
 		
 	//#### DEBUT DU RAY CASTING ####
-	Sphere sphereHit;
-	float tPlan,tSphere;
-	bool bSphere = intersection(spheres, ray, tSphere, sphereHit);
-	bool bPlan= intersectPlan(plan,ray, tPlan);
-	vec3 i = vec3(-1.0);
-	if (bSphere && tSphere<tPlan || bSphere && !bPlan){
-		i = (ray.v * tSphere) + ray.ori; 
-		// Calcul des vecteurs à l'impact
-		vec3 vi = normalize(light.c - i); 		//VECTEUR VERS LA LUMIERE
-		vec3 n = normalize(i - sphereHit.c); 	//VECTEUR NORMAL A LA SPHERE
-		vec3 v0 = normalize(ray.ori-i); // Vecteur vers l'origine
+	// Sphere sphereHit;
+	// float tPlan,tSphere;
+	// bool bSphere = intersection(spheres, ray, tSphere, sphereHit);
+	// bool bPlan= intersectPlan(plan,ray, tPlan);
+	// vec3 i = vec3(-1.0);
+	// if (bSphere && tSphere<tPlan || bSphere && !bPlan){
+		// i = (ray.v * tSphere) + ray.ori; 
+		
+		// vec3 vi = normalize(light.c - i); 		//VECTEUR VERS LA LUMIERE
+		// vec3 n = normalize(i - sphereHit.c); 	//VECTEUR NORMAL A LA SPHERE
+		// vec3 v0 = normalize(ray.ori-i); // Vecteur vers l'origine
 	
-		if(algorythm==0){gl_FragColor = vec4(sphereHit.mat.Kd,1.0);}
-		if(algorythm==1){lambertianShading(light, n, vi, sphereHit);}
-		if(algorythm==2){phong(light, sphereHit, vi, v0, n);}
-		if(algorythm==3){microFacette (light, n, vi, v0, sphereHit);}
+		// if(algorythm==0){gl_FragColor = vec4(sphereHit.mat.Kd,1.0);}
+		// if(algorythm==1){lambertianShading(light, n, vi, sphereHit);}
+		// if(algorythm==2){phong(light, sphereHit, vi, v0, n);}
+		// if(algorythm==3){microFacette (light, n, vi, v0, sphereHit);}
 	
-	}
-	else if (bPlan)  {
-		i = (ray.v * tPlan) + ray.ori; 
-		vec3 vi = normalize(light.c - i); 		
-		vec3 n = normalize( plan.norm); 	
-		vec3 v0 = normalize(ray.ori-i); 
-		if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
-			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
-			// gl_FragColor = vec4(0.1,0.1,0.3,1.0);
-			}
-		else {
-			lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
-			// gl_FragColor = vec4(0.1,0.1,0.5,1.0);
-		}
-	}else {
-		gl_FragColor = vec4(0.7,0.7,0.7,1.0);
-	}
+	// }
+	// else if (bPlan)  {
+		// i = (ray.v * tPlan) + ray.ori; 
+		// vec3 vi = normalize(light.c - i); 		
+		// vec3 n = normalize( plan.norm); 	
+		// vec3 v0 = normalize(ray.ori-i); 
+		// if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
+			// lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
+			// }
+		// else {
+			// lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
+			
+		// }
+	// }else {
+		// gl_FragColor = vec4(0.7,0.7,0.7,1.0);
+	// }
 	
-	
-	vec3 vi = normalize(light.c - i);
-	Ray toLight;
-	toLight.v = vi;
-	toLight.ori = i+vi;
-	bool obstacle = intersection(spheres, toLight , tSphere, sphereHit);
-	if(obstacle){
-		gl_FragColor = vec4(0.0,0.0,0.0,1.0);
-	}
+	vec4 BRDF;
+	float tMin ;
+	tMin = intersectScene ( spheres,  plan , ray ,light,  BRDF );
+	gl_FragColor = BRDF;
+	shadow (tMin, ray, spheres,  light );
 	
 	
 		
