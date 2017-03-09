@@ -273,7 +273,7 @@ function redraw() {
 	drawScene();
 	
 	refreshInfo();
-	
+
 
 
 }
