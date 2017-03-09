@@ -140,7 +140,7 @@ struct Plan{
 //############### Intersection algorythm ##############
 /**
 * Fonction qui test l'impact entre une sphere et un rayon
-* @param Sphere s: sphere a tester
+* @param Sphere s: sphere à tester
 * @param Ray r: rayon lancé
 */
 float intersectSphere(Sphere s, Ray r){
@@ -194,7 +194,6 @@ float intersectionAllSpheres(Sphere[nbS] spheres, Ray r,  out Sphere s){
 * return -1.0 si pas d'intersection
 */ 
 float intersectPlan(Plan p , Ray r){
-	 //"RayCasting"
 	 float t = -(dot(p.norm,r.ori)+p.h)/(dot(p.norm,r.v));
 	 if (t<0.0) {return -1.0;}
 	 else{

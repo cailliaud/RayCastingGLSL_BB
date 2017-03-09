@@ -46,15 +46,15 @@ function showInfoSphere(){
 // =====================================================
 function webGLStart() {
 	//Instanciation d'un objet sphere
-	mat1 = new Materiau(0.1,0.1,0.1,0.0,1.3,0.1);
-	mat2 = new Materiau(0.0,0.3,0.1,0.0,0.9,0.1);
+	mat1 = new Materiau(0.4,0.3,0.0,0.0,1.3,0.1);
+	mat2 = new Materiau(0.3,0.1,0.1,0.0,0.9,0.1);
 	mat3 = new Materiau(0.2,0.4,0.3,0.0,1.1,0.1);
 	mat4 = new Materiau(0.1,0.0,0.3,0.0,1.7,0.1);
 	
-	sphere = new Sphere(0.0,0.0,150.0,9.0, mat1);
-	sphere2 = new Sphere(0.0,25,150.0,7.0, mat2);
-	sphere3 = new Sphere(-50.0,10.0,300.0,13.0, mat3);
-	sphere4 = new Sphere(25,5.0,100.0,9.0, mat4);
+	sphere = new Sphere(0.0,0.0,200.0,15, mat1);
+	sphere2 = new Sphere(0.0,0.0,200.0,3.0, mat2);
+	sphere3 = new Sphere(-50.0,10.0,200.0,5.0, mat3);
+	sphere4 = new Sphere(25,5.0,200.0,6.0, mat4);
 	
 	// Instanciation d'un objet lumière
 	light = new Light (120.0,350.0,0.0,15.0);
@@ -336,19 +336,23 @@ function redraw() {
 
 function start(){
 			
-			// sphere.y= sphere.y-0.1;
+			
 			sinL++;
 			cosL++;
 			
 			
-			gravity(sphere);
-			gravity(sphere2);
-			gravity(sphere3);
-			gravity(sphere4);
+			// gravity(sphere);
+			// gravity(sphere2);
+			// gravity(sphere3);
+			// gravity(sphere4);
+			
+			moveSattelite(sphere2,sphere, 20.0);
+			moveSattelite(sphere3,sphere, 43.0);
+			moveSattelite(sphere4,sphere, 70.0);
+			moveLight_XZaxis(light);
+			
 			setUniform();
 			drawScene();
-			moveSphere_ZXaxis(sphere);
-			moveLight_XZaxis(light);
 			refreshInfo();
 			timer  = setTimeout(arguments.callee, 16);
 			
@@ -364,9 +368,9 @@ function stop() {
 
 
 
-function moveSphere_ZXaxis(s){
-	s.x= Math.sin(sinL/20)*15+5;
-	s.z= Math.cos(cosL/20)*15+150;
+function moveSattelite(sattelite,soleil, distance){
+	sattelite.x= Math.sin(sinL/distance)*(20+distance);
+	sattelite.z= Math.cos(cosL/distance)*(20+distance)+soleil.z;
 }
 
 function moveLight_XZaxis(light){
