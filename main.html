@@ -22,11 +22,30 @@
 		<td  >
 			<canvas id="WebGL-test" style="border: 1px solid black;" width="720" height="480"></canvas>
 		</td>
-		<td  >
-			<input type=button value="Start !" onclick="start();" />
-		</td>
 		<td>
-		<input type=button value="Stop !" onclick="stop();" />
+			<table>
+				<th colspan="2" >
+					Actions sur nos spheres
+					
+				</th>
+				
+				<tr>
+					<td  >
+					
+					<input type="radio" id="solar" name="action" value="solar" onclick="start();"> Systeme Solaire<br>
+					<input type="radio" id="gravity" name="action" value="gravity" onclick="start();" > Gravité<br>
+					<input type="radio" id="BoiteDeNuit" name="action" value="BoiteDeNuit" onclick="start();" > BoiteDeNuit<br>
+					</td>
+					<td>
+				</tr>
+				<tr>	
+					<td>
+					<input type=button value="Stop !" onclick="stop();" />
+					</td>
+				
+					
+				</tr>
+			</table>
 		</td>
 		
 		<td>
@@ -61,7 +80,7 @@
 				<tr>
 				
 					<td >Valeur de M(<output id="outputM"></output>):</td>
-					<td >0<input type=range min="0" max="1.5" step="0.1"  id="M"  onchange="redraw();" />1.5</td>
+					<td >.1<input type=range min="0.1" max="1" step="0.1"  id="M"  onchange="redraw();" />1</td>
 				</tr>
 				<tr>
 				

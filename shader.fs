@@ -134,6 +134,7 @@ struct Sphere{
 struct Plan{
 	vec3 norm;
 	float h;
+	int type;
 
 };
 
@@ -202,7 +203,19 @@ float intersectPlan(Plan p , Ray r){
 
 }
 
-		
+float intersectionAllPlan (Plan[nbS] plans, Ray r,  out Plan p){
+	float tAux;
+	float tMin = -1.0;
+	for (int i = 0; i < nbS; i++){
+		tAux = intersectPlan(plans[i], r);
+		if (tMin == -1.0 && tAux > 0.0 || tAux > 0.0 && tAux < tMin){
+			tMin = tAux;
+			p = plans[i];
+		}
+	}
+	return tMin;
+	
+}		
 
 //############### ALGORYTHM 1 ##############
 //############# Lambertian Shading for Sphere  ########
@@ -305,17 +318,18 @@ vec4 lambertianShadingPlan(Light light, vec3 n, vec3 vi, vec3 Kd){
 /**
 * Fonction Intersection Scene
 */
-float intersectScene (Sphere[nbS] spheres, Plan plan , Ray r ,Light light, out vec4 BRDF ){
+float intersectScene (Sphere[nbS] spheres, Plan[nbS] plans , Ray r ,Light light, out vec4 BRDF ){
 	float tPlan;
 	float tSphere;
 	float  tMin;
 	Sphere sphereHit;
+	Plan planHit;
 	vec3 i;
 	vec3 vi;
 	vec3 n;
 	vec3 vO;
 	tSphere = intersectionAllSpheres(spheres, r, sphereHit);
-	tPlan = intersectPlan(plan,r);
+	tPlan = intersectionAllPlan(plans,r,planHit);
 	
 	if ((tSphere>-1.0 && tPlan==-1.0) || (tSphere > -1.0 && tPlan > -1.0 && tSphere<tPlan)  ){
 		i = (r.v * tSphere) + r.ori; 
@@ -329,9 +343,14 @@ float intersectScene (Sphere[nbS] spheres, Plan plan , Ray r ,Light light, out v
 	if ((tSphere > -1.0 && tPlan > -1.0  && tSphere>tPlan) || (tSphere==-1.0 && tPlan>-1.0) ){
 		i = (r.v * tPlan) + r.ori; 
 		 vi = normalize(light.c - i); 		
-		 n = normalize( plan.norm); 	
+		 n = normalize( planHit.norm); 	
 		 vO = normalize(r.ori-i); 
-		if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
+		
+		bool testDamier;
+		if (planHit.type ==1){testDamier	=mod(floor(i.x/10.0) + floor (i.z/10.0), 2.0) == 0.0;}
+		if (planHit.type ==2){testDamier	=mod(floor(i.x/10.0) + floor (i.y/10.0), 2.0) == 0.0;}
+		if (planHit.type ==3){testDamier	=mod(floor(i.y/10.0) + floor (i.z/10.0), 2.0) == 0.0;}
+		if (testDamier ){
 			BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
 			
 			}
@@ -431,51 +450,43 @@ void main(void){
 			)
 		);
 		
-	//####DEFINTION DU PLAN
+	//####DEFINTION DES PLANS
+	
+	// planché
+	Plan plans[nbS];
 	Plan plan;
 	plan.norm = normalize(vec3(0.0,1.0,0.0));
 	plan.h = 20.0;
+	plan.type= 1;
 
+	// mur au fond
+	Plan plan2;
+	plan2.norm = normalize(vec3(0.0,0.0,-1.0));
+	plan2.h = 600.0;
+	plan2.type =2;
 	
+	// mur de droite
+	Plan plan3;
+	plan3.norm = normalize(vec3(-1.0,0.0,0.0));
+	plan3.h = 100.0;
+	plan3.type =3;
+	
+	// mur de gauche
+	Plan plan4;
+	plan4.norm = normalize(vec3(1.0,0.0,0.0));
+	plan4.h = 100.0;
+	plan4.type =3;
+	
+	plans[0] = plan;	
+	plans[1] = plan2;
+	plans[2] = plan3;	
+	plans[3] = plan4;
 		
-	//#### DEBUT DU RAY CASTING ####
-	// Sphere sphereHit;
-	// float tPlan,tSphere;
-	// bool bSphere = intersection(spheres, ray, tSphere, sphereHit);
-	// bool bPlan= intersectPlan(plan,ray, tPlan);
-	// vec3 i = vec3(-1.0);
-	// if (bSphere && tSphere<tPlan || bSphere && !bPlan){
-		// i = (ray.v * tSphere) + ray.ori; 
-		
-		// vec3 vi = normalize(light.c - i); 		//VECTEUR VERS LA LUMIERE
-		// vec3 n = normalize(i - sphereHit.c); 	//VECTEUR NORMAL A LA SPHERE
-		// vec3 v0 = normalize(ray.ori-i); // Vecteur vers l'origine
 	
-		// if(algorythm==0){gl_FragColor = vec4(sphereHit.mat.Kd,1.0);}
-		// if(algorythm==1){lambertianShading(light, n, vi, sphereHit);}
-		// if(algorythm==2){phong(light, sphereHit, vi, v0, n);}
-		// if(algorythm==3){microFacette (light, n, vi, v0, sphereHit);}
-	
-	// }
-	// else if (bPlan)  {
-		// i = (ray.v * tPlan) + ray.ori; 
-		// vec3 vi = normalize(light.c - i); 		
-		// vec3 n = normalize( plan.norm); 	
-		// vec3 v0 = normalize(ray.ori-i); 
-		// if (mod(abs(i.x-20.0),20.0)<= 10.0 && mod(abs(i.z-0.0),20.0)<= 10.0) {
-			// lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
-			// }
-		// else {
-			// lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
-			
-		// }
-	// }else {
-		// gl_FragColor = vec4(0.7,0.7,0.7,1.0);
-	// }
 	
 	vec4 BRDF;
 	float tMin ;
-	tMin = intersectScene ( spheres,  plan , ray ,light,  BRDF );
+	tMin = intersectScene ( spheres,  plans , ray ,light,  BRDF );
 	gl_FragColor = BRDF;
 	shadow (tMin, ray, spheres,  light );
 	

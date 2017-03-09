@@ -6,7 +6,7 @@ var vertShaderTxt;
 var fragShaderTxt;
 var shaderProgram;
 var vertexBuffer;
-var sphere = null;
+var sphere, sphere2, sphere3, sphere4 = null;
 var backgroundColor = [0.2,0.2,0.2];
 var timer;
 var sinL = 0;
@@ -17,7 +17,7 @@ function Sphere(x,y,z,rad,mat){
 	this.y = y;
 	this.z = z;
 	this.rad = rad;
-	this.g = -0.02;
+	this.g = -0.2;
 	this.speed= 0.1;
 
 	this.mat = mat;
@@ -51,13 +51,13 @@ function webGLStart() {
 	mat3 = new Materiau(0.2,0.4,0.3,0.0,1.1,0.1);
 	mat4 = new Materiau(0.1,0.0,0.3,0.0,1.7,0.1);
 	
-	sphere = new Sphere(0.0,0.0,200.0,15, mat1);
+	sphere = new Sphere(0.0,0.0,200.0,15.0, mat1);
 	sphere2 = new Sphere(0.0,0.0,200.0,3.0, mat2);
 	sphere3 = new Sphere(-50.0,10.0,200.0,5.0, mat3);
 	sphere4 = new Sphere(25,5.0,200.0,6.0, mat4);
 	
 	// Instanciation d'un objet lumière
-	light = new Light (120.0,350.0,0.0,15.0);
+	light = new Light (0.0,175.0,100.0,8.0);
 	
 	var canvas = document.getElementById("WebGL-test");
 	initGL(canvas);
@@ -335,30 +335,76 @@ function redraw() {
 
 
 function start(){
-			
-			
-			sinL++;
-			cosL++;
-			
-			
-			// gravity(sphere);
-			// gravity(sphere2);
-			// gravity(sphere3);
-			// gravity(sphere4);
-			
-			moveSattelite(sphere2,sphere, 20.0);
-			moveSattelite(sphere3,sphere, 43.0);
-			moveSattelite(sphere4,sphere, 70.0);
-			moveLight_XZaxis(light);
-			
-			setUniform();
-			drawScene();
-			refreshInfo();
-			timer  = setTimeout(arguments.callee, 16);
+	sinL++;
+	cosL++;
+	stop();
+	var mode;
+	
+	if (document.getElementById('solar').checked) {
+	mode = document.getElementById('solar').value;
+	}
+	if (document.getElementById('gravity').checked) {
+	mode = document.getElementById('gravity').value;
+	}
+	if (document.getElementById('BoiteDeNuit').checked) {
+	mode = document.getElementById('BoiteDeNuit').value;
+	}
+	
+	switch(mode){
+		case "gravity" :
+		    fallSystem();
+			break;
+		case "solar":
+			solarSystem();
+			break;
+		case "BoiteDeNuit":
+			boiteNuit();
+			break;
+		default:
+			break;
+	}
+	moveLight_XZaxis(light);
+	setUniform();
+	drawScene();
+	refreshInfo();
+	timer  = setTimeout(arguments.callee, 16);
 			
 	};
 
+function fallSystem(){
+	gravity(sphere);
+	gravity(sphere2);
+	gravity(sphere3);
+	gravity(sphere4);
+}
+function solarSystem(){
+	
+	moveSattelite(sphere2,sphere, 20.0);
+	moveSattelite(sphere3,sphere, 43.0);
+	moveSattelite(sphere4,sphere, 70.0);
+	
+	
+}
 
+function boiteNuit(){
+	
+	sphere.mat.r = (sphere.mat.r< 0.7 ) ?sphere.mat.r+=0.005 : sphere.mat.r-=0.005	;
+	sphere.mat.g = (sphere.mat.g< 0.5) ?sphere.mat.g+=0.005 :	sphere.mat.g=0.0;
+
+	
+	sphere2.mat.r = (sphere2.mat.r< 0.3) ?sphere2.mat.r+=0.005 :	sphere2.mat.r=0.0;
+	sphere2.mat.g = (sphere2.mat.g< 0.2) ?sphere2.mat.g+=0.005 :	sphere2.mat.g=0.0;
+	sphere2.mat.b = (sphere2.mat.b< 0.2) ?sphere2.mat.b+=0.005 :	sphere2.mat.b=0.0;
+	
+	sphere3.mat.r = (sphere3.mat.r< 0.5) ?sphere3.mat.r+=0.005 :	sphere3.mat.r=0.0;
+	sphere3.mat.g = (sphere3.mat.g< 0.4) ?sphere3.mat.g+=0.005 :	sphere3.mat.g=0.0;
+	sphere3.mat.b = (sphere3.mat.b< 0.3) ?sphere3.mat.b+=0.005 :	sphere3.mat.b=0.0;
+	
+	sphere4.mat.r = (sphere4.mat.r< 0.2) ?sphere4.mat.r+=0.005 :	sphere4.mat.r=0.0;
+	sphere4.mat.g = (sphere4.mat.g< 0.7) ?sphere4.mat.g+=0.005 :	sphere4.mat.g=0.0;
+	sphere4.mat.b = (sphere4.mat.b< 0.5) ?sphere4.mat.b+=0.005 :	sphere4.mat.b=0.0;
+	
+}
 function stop() {
         if (timer) {
             clearTimeout(timer);
@@ -374,13 +420,15 @@ function moveSattelite(sattelite,soleil, distance){
 }
 
 function moveLight_XZaxis(light){
-	light.x= Math.sin(sinL/100)*400;
-	light.z= Math.cos(cosL/100)*400;
+	light.x= Math.sin(sinL/100)*100;
+	light.z= Math.cos(cosL/100)*100;
 }
 function gravity(s){
 	s.speed += s.g;
 	s.y += s.speed;
-	if (s.y-s.rad <= -20.0) {s.speed = s.rad/9;}
+	if (s.y-s.rad <= -20.0) {s.speed = (sphere.rad - s.rad)/3 +1  ;}
+	
+
 }
 
 
