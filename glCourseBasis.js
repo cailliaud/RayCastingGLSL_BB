@@ -4,7 +4,7 @@ var gl;
 var shadersLoaded = 0;
 var vertShaderTxt;
 var fragShaderTxt;
-var shaderProgram;
+var shaderProgram =null;
 var vertexBuffer;
 var sphere, sphere2, sphere3, sphere4 = null;
 var backgroundColor = [0.2,0.2,0.2];
@@ -31,11 +31,13 @@ function Materiau (r,g,b, ks, ni , m){
 	this.ni = ni;
 	this.m = m;
 }
-function Light(x,y,z,p){
+function Light(x,y,z,r,g,b){
 	this.x = x;
 	this.y = y;
 	this.z = z;
-	this.p = p;
+	this.r = r;
+	this.g = g;
+	this.b = b;
 
 }
 
@@ -57,7 +59,7 @@ function webGLStart() {
 	sphere4 = new Sphere(25,5.0,200.0,6.0, mat4);
 	
 	// Instanciation d'un objet lumière
-	light = new Light (0.0,175.0,100.0,8.0);
+	light = new Light (0.0,175.0,100.0,3.0,3.0,3.0);
 	
 	var canvas = document.getElementById("WebGL-test");
 	initGL(canvas);
@@ -94,7 +96,7 @@ function refreshInfo() {
 	document.getElementById("posXLight").value= light.x.toFixed(1);
 	document.getElementById("posYLight").value= light.y.toFixed(1);
 	document.getElementById("posZLight").value= light.z.toFixed(1);
-	document.getElementById("PuissanceLight").value= light.p.toFixed(1);
+	// document.getElementById("PuissanceLight").value= light.p.toFixed(1);
 	
 
 
@@ -115,7 +117,7 @@ function refreshInfo() {
 	document.getElementById("outputRedSphere").value= sphere.mat.r.toFixed(1);
 	document.getElementById("outputGreenSphere").value= sphere.mat.g.toFixed(1);
 	document.getElementById("outputBlueSphere").value= sphere.mat.b.toFixed(1);
-	document.getElementById("outputPuissanceLight").value= light.p.toFixed(1);
+	// document.getElementById("outputPuissanceLight").value= light.p.toFixed(1);
 
 
 
@@ -141,13 +143,13 @@ function initBuffers() {
 	vertexBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 	vertices = [
-							-1.0, -1.0,
-							-1.0,  1.0,
-							 1.0,  1.0,
-							 1.0, -1.0
+							-1.0, -1.0,0.0,
+							-1.0,  1.0,0.0,
+							 1.0,  1.0,0.0,
+							 1.0, -1.0,0.0
 							];
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-	vertexBuffer.itemSize = 2;
+	vertexBuffer.itemSize = 3;
 	vertexBuffer.numItems = 4;
 }
 
@@ -286,7 +288,7 @@ function setUniform(){
 	
 	
 	gl.uniform3f(shaderProgram.lumiereCenter, light.x, light.y, light.z);
-	gl.uniform1f(shaderProgram.lumierePuissance, light.p );
+	gl.uniform3f(shaderProgram.lumierePuissance, light.r,light.g,light.b );
 }
 
 
@@ -299,6 +301,7 @@ function drawScene() {
       vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 	gl.drawArrays(gl.TRIANGLE_FAN, 0, vertexBuffer.numItems);
+
 }
 
 
@@ -363,13 +366,14 @@ function start(){
 		default:
 			break;
 	}
-	moveLight_XZaxis(light);
+	// moveLight_XZaxis(light);
 	setUniform();
 	drawScene();
 	refreshInfo();
 	timer  = setTimeout(arguments.callee, 16);
 			
 	};
+
 
 function fallSystem(){
 	gravity(sphere);
@@ -406,6 +410,7 @@ function boiteNuit(){
 	
 }
 function stop() {
+		
         if (timer) {
             clearTimeout(timer);
             timer = 0;
@@ -426,7 +431,8 @@ function moveLight_XZaxis(light){
 function gravity(s){
 	s.speed += s.g;
 	s.y += s.speed;
-	if (s.y-s.rad <= -20.0) {s.speed = (sphere.rad - s.rad)/3 +1  ;}
+	if (s.y-s.rad <= -20.0) 
+	{s.speed = (sphere.rad - s.rad)/3 +1  ;}
 	
 
 }

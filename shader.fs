@@ -29,12 +29,14 @@ int algorythm = 3;
 
 // Information Sphère 
 const int nbS = 4;
+const int nbP = 4;
+const int nbL = 3;
 uniform vec3 backgroundColor;
 
 
 // Information lumière
 uniform vec3 lumiereCenter;
-uniform float lumierePuissance;
+uniform vec3 lumierePuissance;
 
 // #####Récupération Sphere 1 #####
 uniform vec3 sphere1_Center;
@@ -91,7 +93,7 @@ struct Ray{
 */
 struct Light{
 		vec3 c;	//Center of the light
-		float p;	//Power of the light (spectrum)
+		vec3 p;	//Power of the light (spectrum)
 	};
 
 //#### 	MATERIAU ####
@@ -135,6 +137,17 @@ struct Plan{
 	vec3 norm;
 	float h;
 	int type;
+
+};
+
+//#### INTERSECTION ####
+/**
+* Structure d'intersection
+*/
+struct Intersection{
+	float t;
+	vec4 BRDF;
+	
 
 };
 
@@ -203,10 +216,10 @@ float intersectPlan(Plan p , Ray r){
 
 }
 
-float intersectionAllPlan (Plan[nbS] plans, Ray r,  out Plan p){
+float intersectionAllPlan (Plan[nbP] plans, Ray r,  out Plan p){
 	float tAux;
 	float tMin = -1.0;
-	for (int i = 0; i < nbS; i++){
+	for (int i = 0; i < nbP; i++){
 		tAux = intersectPlan(plans[i], r);
 		if (tMin == -1.0 && tAux > 0.0 || tAux > 0.0 && tAux < tMin){
 			tMin = tAux;
@@ -318,7 +331,7 @@ vec4 lambertianShadingPlan(Light light, vec3 n, vec3 vi, vec3 Kd){
 /**
 * Fonction Intersection Scene
 */
-float intersectScene (Sphere[nbS] spheres, Plan[nbS] plans , Ray r ,Light light, out vec4 BRDF ){
+void intersectLight (Sphere[nbS] spheres, Plan[nbP] plans , Ray r ,Light light, out Intersection intersect ){
 	float tPlan;
 	float tSphere;
 	float  tMin;
@@ -337,8 +350,8 @@ float intersectScene (Sphere[nbS] spheres, Plan[nbS] plans , Ray r ,Light light,
 		vi = normalize(light.c - i); 	
 		n = normalize(i - sphereHit.c); 	
 		vO = normalize(r.ori-i); 
-		BRDF= microFacette(light, n, vi, vO, sphereHit);
-		return tSphere;
+		intersect.BRDF= microFacette(light, n, vi, vO, sphereHit);
+		intersect.t= tSphere;
 	}
 	if ((tSphere > -1.0 && tPlan > -1.0  && tSphere>tPlan) || (tSphere==-1.0 && tPlan>-1.0) ){
 		i = (r.v * tPlan) + r.ori; 
@@ -351,49 +364,94 @@ float intersectScene (Sphere[nbS] spheres, Plan[nbS] plans , Ray r ,Light light,
 		if (planHit.type ==2){testDamier	=mod(floor(i.x/10.0) + floor (i.y/10.0), 2.0) == 0.0;}
 		if (planHit.type ==3){testDamier	=mod(floor(i.y/10.0) + floor (i.z/10.0), 2.0) == 0.0;}
 		if (testDamier ){
-			BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
+			intersect.BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.2));
 			
 			}
 		else {
-			BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
+			intersect.BRDF=lambertianShadingPlan( light,  n,  vi, vec3(0.1,0.1,0.3));
 			
 		}
-		return tPlan;
+		intersect.t=tPlan;
 	}
 	
-	BRDF= vec4(0.7,0.7,0.7,1.0);
-	return -1.0;
+	if (tSphere==-1.0 && tPlan ==-1.0){
+		intersect.BRDF= vec4(0.7,0.7,0.7,1.0);
+		intersect.t= -1.0;
+	}
+	
 		
 }
-			
 
-void shadow (float t, Ray ray, Sphere[nbS] spheres, Light light ){
+void intersectScene	(Sphere[nbS] spheres, Plan[nbP] plans , Ray ray ,Light[nbL] lights, out Intersection[nbL] tabIntersect ){
+	for (int i = 0; i < nbL; i++){
+		intersectLight( spheres,  plans , ray ,lights[i], tabIntersect[i] );
+		
+	}
+}
+
+vec4 calculBRDF(Intersection[nbL] tabIntersect){
+	vec4 BRDFtot;
+	BRDFtot=vec4(0.0,0.0,0.0,1.0);
+	for (int i = 0; i < nbL; i++){
+		BRDFtot=BRDFtot+tabIntersect[i].BRDF;
+	}
+	return BRDFtot;
+}
+
+void shadow ( Ray ray, Sphere[nbS] spheres, Light[nbL] lights,Intersection[nbL] tabIntersect  ){
 	Ray toLight;
 	vec3 point_i;
 	vec3 vi;
 	float tMin;
 	Sphere sphereHit;
+	int compteurTouch;
+	compteurTouch=0;
+	vec4 BRDF;
 	
-	point_i = (ray.v * t) + ray.ori; 
-	vi = normalize(light.c - point_i);
-	toLight.v = vi;
-	toLight.ori = point_i+vi; 
-	tMin = intersectionAllSpheres(spheres, toLight , sphereHit);
-	if(tMin>-1.0){
-		gl_FragColor = vec4(0.0,0.0,0.0,1.0);
-		
+	BRDF= calculBRDF( tabIntersect);
+	
+	
+	for (int i = 0; i < nbL; i++){
+		point_i = (ray.v * tabIntersect[i].t) + ray.ori; 
+		vi = normalize(lights[i].c - point_i);
+		toLight.v = vi;
+		toLight.ori = point_i+vi; 
+		tMin = intersectionAllSpheres(spheres, toLight , sphereHit);
+		if(tMin>-1.0){
+			compteurTouch+=1;
+			
+			
+		}
 	}
+	if (compteurTouch > 0 ) 
+	{gl_FragColor = BRDF * 0.7* float(compteurTouch);
+	}else {
+	gl_FragColor=BRDF; }
+	
+	
 }
 	
 void main(void){
 
 	//#### DEFINITION DE LA LUMIERE ####
+	
+	Light lights[nbL];
+	
 	Light light;
 	light.c =lumiereCenter;
 	light.p = lumierePuissance;
 	
+	Light light2;
+	light2.c =vec3(0.0,50.0,-200.0);
+	light2.p = vec3(1.0,1.0,5.0);
 	
+	Light light3;
+	light3.c =vec3(50,25.0,-200.0);
+	light3.p = vec3(0.0,4.0,3.0);
 	
+	lights[0] = light;
+	lights[1] = light2;
+	lights[2] = light3;
 	//#### DEFINITION DES SPHERES
 	
 	Sphere spheres[nbS];
@@ -453,7 +511,7 @@ void main(void){
 	//####DEFINTION DES PLANS
 	
 	// planché
-	Plan plans[nbS];
+	Plan plans[nbP];
 	Plan plan;
 	plan.norm = normalize(vec3(0.0,1.0,0.0));
 	plan.h = 20.0;
@@ -481,15 +539,23 @@ void main(void){
 	plans[1] = plan2;
 	plans[2] = plan3;	
 	plans[3] = plan4;
-		
+	
+    // ###### DEFINITION DU TABLEAU INTERSECTIONS
+	Intersection tabIntersect[nbL];
+	
+	Intersection intersection1;
+	Intersection intersection2;
+	
+	tabIntersect[0]=intersection1;
+	tabIntersect[1]=intersection2;
 	
 	
-	vec4 BRDF;
-	float tMin ;
-	tMin = intersectScene ( spheres,  plans , ray ,light,  BRDF );
-	gl_FragColor = BRDF;
-	shadow (tMin, ray, spheres,  light );
 	
+	// ############ MAIN 
+	
+	intersectScene(spheres, plans , ray , lights,tabIntersect);
+	
+	shadow (  ray,  spheres, lights, tabIntersect  );
 	
 		
 	
